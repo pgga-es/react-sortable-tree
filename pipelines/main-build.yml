@@ -31,12 +31,12 @@ steps:
 
 - bash: echo Version $(pkgVersion)
 
-# Create .npmrc file
+# Create .npmrc for reading 
 - bash: echo "always-auth=true" > $(System.DefaultWorkingDirectory)/.npmrc
 
-- bash: echo "_auth=\"$(NEXUS_AUTH_SECRET)\"" >> $(System.DefaultWorkingDirectory)/.npmrc
+- bash: echo "_auth=\"$(NEXUS_READ_AUTH_SECRET)\"" >> $(System.DefaultWorkingDirectory)/.npmrc
 
-- bash: echo "registry=https://nexus.wfmdev.com/nexus/content/repositories/eamx-npm-releases" >> $(System.DefaultWorkingDirectory)/.npmrc
+- bash: echo "registry=https://nexus.wfmdev.com/nexus/content/groups/eamx-npm-all" >> $(System.DefaultWorkingDirectory)/.npmrc
 
 - bash: echo "scripts-prepend-node-path=true" >> $(System.DefaultWorkingDirectory)/.npmrc
 
@@ -44,6 +44,15 @@ steps:
 - bash: yarn install
   
 - bash: npm version --no-git-version $(pkgVersion)
+  #
+# Create .npmrc for writing
+- bash: echo "always-auth=true" > $(System.DefaultWorkingDirectory)/.npmrc
+
+- bash: echo "_auth=\"$(NEXUS_AUTH_SECRET)\"" >> $(System.DefaultWorkingDirectory)/.npmrc
+
+- bash: echo "registry=https://nexus.wfmdev.com/nexus/content/repositories/eamx-npm-releases" >> $(System.DefaultWorkingDirectory)/.npmrc
+
+- bash: echo "scripts-prepend-node-path=true" >> $(System.DefaultWorkingDirectory)/.npmrc
 
 # Can't fail on Stderr because the maintainer hasn't updated third party deps
 - bash: npm publish 
