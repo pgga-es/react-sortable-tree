@@ -1,0 +1,53 @@
+# Main build for @webcore/react-sortable-tree
+# Modify major/minor/patch here for release versioning
+
+name: $(pkgVersion)
+trigger:
+  branches:
+    include:
+      - webcore-main
+  paths:
+    exclude:
+    - README.md
+    - CHANGELOG.md
+
+pool:
+  vmImage: 'macOS-latest'
+
+variables: 
+  - group: webcore-var-group
+  - name: major 
+    value: 1 
+  - name: minor 
+    value: 0 
+  - name: patch 
+    value: $[counter(format('{0}.{1}', variables['major'], variables['minor']), 0)] 
+  - name: pkgVersion 
+    value: $[format('{0}.{1}.{2}', variables['major'], variables['minor'], variables['patch'])] 
+
+steps:
+- checkout: self
+  persistCredentials: true
+
+- bash: echo Version $(pkgVersion)
+
+# Create .npmrc file
+- bash: echo "always-auth=true" > $(System.DefaultWorkingDirectory)/.npmrc
+
+- bash: echo "_auth=\"$(NEXUS_AUTH_SECRET)\"" >> $(System.DefaultWorkingDirectory)/.npmrc
+
+- bash: echo "registry=https://nexus.wfmdev.com/nexus/content/repositories/eamx-npm-releases" >> $(System.DefaultWorkingDirectory)/.npmrc
+
+- bash: echo "scripts-prepend-node-path=true" >> $(System.DefaultWorkingDirectory)/.npmrc
+
+# Not fail on Std Err here because of fsevent compilation (optional) failures
+- bash: yarn install
+  
+- bash: npm version --no-git-version $(pkgVersion)
+
+# Can't fail on Stderr because the maintainer hasn't updated third party deps
+- bash: npm publish 
+
+# Best effort is to check whether the package made it to Nexus
+- bash: if (test `npm view @webcore/react-sortable-tree@$(pkgVersion) -json | wc -l` -eq 0 );then >&2 echo "Error - could not find version in nexus"; fi
+  failOnStderr: true

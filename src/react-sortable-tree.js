@@ -6,7 +6,7 @@ import withScrolling, {
   createScrollingComponent,
   createVerticalStrength,
   createHorizontalStrength,
-} from 'frontend-collective-react-dnd-scrollzone';
+} from '@webcore/frontend-collective-react-dnd-scrollzone';
 import { DndProvider, DndContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { polyfill } from 'react-lifecycles-compat';

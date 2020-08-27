@@ -24,3 +24,6 @@ style.css.map
 yarn-error.log
 
 .vscode
+
+# webcore - ignore .npmrc
+.npmrc
